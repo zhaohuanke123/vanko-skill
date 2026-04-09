@@ -1,0 +1,25 @@
+---
+description: Task-driven AI delivery workflow for repos that use architecture docs, task backlogs, progress logs, and guarded one-task iterations.
+globs: []
+alwaysApply: false
+---
+
+# Task-Driven AI Dev
+
+Use this rule when the repository is managed through files such as `architecture.md`, `task.json`, `progress.txt`, `project-config.json`, `CLAUDE.md`, or `AGENTS.md`.
+
+## Workflow
+
+1. Rebuild context from architecture, backlog, progress history, and recent commits.
+2. Select one ready task with satisfied dependencies.
+3. Implement only that task.
+4. Run the required validation commands and browser checks when the change affects user-facing flows.
+5. Update task state and progress history only after validation succeeds.
+6. Stop after one completed task or one documented block.
+
+## Guardrails
+
+- Do not use blind shell loops to drive repeated agent sessions.
+- Do not mark a task complete without real validation evidence.
+- Do not hide blocked work by flipping completion flags.
+- Treat tool-specific rule files as adapters; the backlog and progress artifacts remain the source of truth.

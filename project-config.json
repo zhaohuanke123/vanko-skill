@@ -1,0 +1,26 @@
+{
+  "project_name": "task-driven-ai-dev",
+  "app_root": ".",
+  "artifacts": {
+    "architecture": "",
+    "tasks": "",
+    "progress": "",
+    "readme": "README.md",
+    "codex_skill": "codex-skill/task-driven-ai-dev/SKILL.md",
+    "claude_agent": "claude-agent/task-driven-ai-dev.md",
+    "cursor_rule": "cursor-rule/task-driven-ai-dev.mdc"
+  },
+  "bootstrap_commands": [],
+  "dev_server_commands": [],
+  "validation_commands": [
+    "python C:\\Users\\zhk02\\.codex\\skills\\.system\\skill-creator\\scripts\\quick_validate.py codex-skill/task-driven-ai-dev",
+    "python -m py_compile codex-skill/task-driven-ai-dev/scripts/select_next_task.py codex-skill/task-driven-ai-dev/scripts/validate_iteration.py"
+  ],
+  "browser_test_required_when": [],
+  "blocking_prerequisites": [],
+  "notes": [
+    "This repository is a distribution package, not an application runtime.",
+    "Claude Code support is shipped as a subagent file because that is the stable official integration surface.",
+    "Cursor support is shipped as a project rule file."
+  ]
+}

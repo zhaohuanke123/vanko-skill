@@ -1,0 +1,4 @@
+interface:
+  display_name: "Task-Driven AI Dev"
+  short_description: "Run guarded task-based AI delivery loops"
+  default_prompt: "Use $task-driven-ai-dev to analyze this repo, choose the next safe task, and run one validated delivery iteration."
