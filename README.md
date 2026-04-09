@@ -74,3 +74,9 @@ git push -u origin main
 ## Repo Config
 
 This package also includes its own [project-config.json](./project-config.json). It tells an agent how to validate the package itself and where the shipped artifacts live.
+
+## Repository Hygiene
+
+- [LICENSE](./LICENSE): MIT license for permissive reuse.
+- [.gitattributes](./.gitattributes): normalize line endings across platforms.
+- [validate.yml](./.github/workflows/validate.yml): GitHub Actions workflow to validate the shipped Codex skill and Python helper scripts.

@@ -1,0 +1,62 @@
+name: Validate Package
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate Codex skill structure
+        run: |
+          python - <<'PY'
+          import pathlib
+
+          skill = pathlib.Path("codex-skill/task-driven-ai-dev/SKILL.md")
+          text = skill.read_text(encoding="utf-8")
+          if not text.startswith("---\n"):
+            raise SystemExit("SKILL.md missing YAML frontmatter")
+          parts = text.split("---", 2)
+          if len(parts) < 3:
+            raise SystemExit("SKILL.md frontmatter is incomplete")
+          frontmatter = parts[1]
+          values = {}
+          for raw_line in frontmatter.splitlines():
+            line = raw_line.strip()
+            if not line or ":" not in line:
+              continue
+            key, value = line.split(":", 1)
+            values[key.strip()] = value.strip()
+          if not values.get("name") or not values.get("description"):
+            raise SystemExit("Frontmatter must include name and description")
+          print("SKILL.md frontmatter validation passed")
+          PY
+
+      - name: Compile Python scripts
+        run: |
+          python -m py_compile \
+            codex-skill/task-driven-ai-dev/scripts/select_next_task.py \
+            codex-skill/task-driven-ai-dev/scripts/validate_iteration.py
+
+      - name: Smoke test task selector
+        run: |
+          python codex-skill/task-driven-ai-dev/scripts/select_next_task.py \
+            --task-file codex-skill/task-driven-ai-dev/assets/templates/task.json
+
+      - name: Smoke test iteration validator
+        run: |
+          python codex-skill/task-driven-ai-dev/scripts/validate_iteration.py \
+            --task-file codex-skill/task-driven-ai-dev/assets/templates/task.json \
+            --progress-file codex-skill/task-driven-ai-dev/assets/templates/progress.txt
