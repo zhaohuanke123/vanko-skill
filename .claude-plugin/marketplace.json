@@ -16,6 +16,15 @@
       "skills": [
         "./skills/task-driven-ai-dev"
       ]
+    },
+    {
+      "name": "coding-workflow",
+      "description": "A structured development workflow for fullstack projects with verification gates, persistent state, and browser testing integration.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/coding-workflow"
+      ]
     }
   ]
 }

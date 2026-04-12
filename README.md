@@ -15,13 +15,34 @@ Turn a repository into a task-driven AI delivery loop with durable planning arti
 - **Project Configuration**: Repo-specific commands and artifact paths
 - **Git Integration**: Automatic commit after task completion
 
+### coding-workflow
+
+A structured development workflow for fullstack projects with verification gates, persistent state, and browser testing integration.
+
+**Features:**
+- **Task Selection**: Automatically select next incomplete task from task.json
+- **Implementation Guidance**: Follow existing code patterns and conventions
+- **Testing Gates**: Lint, build, and browser testing with MCP Playwright
+- **Progress Documentation**: Persistent session history in progress.txt
+- **Blocking Protocol**: Clear handling of tasks that require human intervention
+- **Rollback Support**: Clean recovery from failed implementations
+
 ## Installation
 
 ### From GitHub Marketplace
 
 ```shell
 /plugin marketplace add zhaohuanke123/vanko-skill
+```
+
+### Install Specific Skills
+
+```shell
+# Task-driven AI development
 /plugin install task-driven-ai-dev@zhaohuanke123-vanko-skill
+
+# Coding workflow
+/plugin install coding-workflow@zhaohuanke123-vanko-skill
 ```
 
 ### Local Development
@@ -34,12 +55,16 @@ claude --plugin-dir ./vanko-skill
 ## Usage
 
 ```shell
+# Task-driven AI development
 /task-driven-ai-dev:task-driven-ai-dev
+
+# Coding workflow
+/coding-workflow:coding-workflow
 ```
 
-## Required Artifacts (for task-driven-ai-dev)
+## Required Artifacts
 
-The skill expects the following files in your project:
+### For task-driven-ai-dev
 
 | File | Purpose |
 |------|---------|
@@ -48,27 +73,14 @@ The skill expects the following files in your project:
 | `progress.txt` | Dated execution log with evidence |
 | `project-config.json` | Repo-specific commands and artifact paths |
 
-## Workflow
+### For coding-workflow
 
-1. **Assess repo state** - Check for existing artifacts
-2. **Select one task** - Choose next ready task with satisfied dependencies
-3. **Implement** - Execute the chosen task
-4. **Validate** - Run required validation commands
-5. **Update artifacts** - Mark task passed, write progress entry
-6. **Commit to git** - Preserve changes with version control
-7. **Stop** - End iteration after completion
-
-## Directory Structure
-
-```
-your-project/
-├── architecture.md      # System architecture
-├── task.json           # Task backlog
-├── progress.txt        # Progress log
-├── project-config.json # Project configuration
-└── .claude/
-    └── settings.json   # Claude Code settings
-```
+| File | Purpose |
+|------|---------|
+| `task.json` | Task definitions with steps and completion status |
+| `progress.txt` | Session history and context |
+| `architecture.md` | System design decisions |
+| `init.sh` | Environment setup script |
 
 ## License
 
