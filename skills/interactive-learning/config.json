@@ -1,5 +1,5 @@
 {
-  "learningDirectory": "D:\\zhk02\\Desktop\\DailyNote\\10_学习",
+  "learningDirectory": "./学习",
   "language": "zh-CN",
   "defaultTemplate": "standard",
   "visualization": {
@@ -15,5 +15,9 @@
     "verificationLevel": "L3",
     "depthOverSpeed": true,
     "maxBranchDepth": 2
+  },
+  "sources": {
+    "obsidianVault": null,
+    "defaultSearchEngine": "web"
   }
 }

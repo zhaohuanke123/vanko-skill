@@ -38,6 +38,8 @@ Interactive learning system based on Bloom's "2 Sigma Problem" and mastery learn
 - **Progress Tracking**: Resume learning across conversations, never lose context
 - **Feynman Method**: Learn by explaining, AI helps you find knowledge gaps
 - **Error Correction**: Correct AI mistakes, make learning a collaborative process
+- **Source Citations**: Generate courses based on your documents, books, or websites with proper citations
+- **Obsidian Integration**: Auto-add `^block-id` for precise note references
 
 ## Installation
 
@@ -108,6 +110,14 @@ claude --plugin-dir ./vanko-skill
 | `知识图谱.md` | Learning path and concept relationships |
 | `XX_标题.md` | Course files with content and checkpoint records |
 | `config.json` | Learning directory and teaching settings |
+
+**Source Materials (Optional):**
+| Type | Example |
+|------|---------|
+| Local files | `./books/guide.pdf` |
+| Obsidian notes | `[[notes/topic]]` |
+| Websites | `https://example.com/article` |
+| Books | `《Book Name》Chapter X` |
 
 ## License
 
