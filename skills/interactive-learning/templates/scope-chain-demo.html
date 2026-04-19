@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作用域链可视化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .scope-ring {
+            transition: all 0.3s ease;
+        }
+        .scope-ring:hover {
+            filter: brightness(1.1);
+        }
+        .scope-ring.active {
+            filter: brightness(1.2);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+        }
+        .variable-item {
+            transition: all 0.2s ease;
+        }
+        .variable-item:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        .search-path {
+            stroke-dasharray: 10;
+            stroke-dashoffset: 100;
+            animation: dash 2s linear forwards;
+        }
+        @keyframes dash {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .found {
+            animation: pulse 0.5s ease-in-out 3;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 to-slate-800 min-h-screen text-white">
+    <div class="container mx-auto p-6 max-w-6xl">
+        <!-- 标题 -->
+        <h1 class="text-3xl font-bold mb-2 text-center">🔍 作用域链可视化</h1>
+        <p class="text-gray-400 text-center mb-6">理解JavaScript如何通过作用域链查找变量</p>
+
+        <!-- 使用说明 -->
+        <div class="bg-slate-800/50 rounded-lg p-4 mb-6 border border-slate-700">
+            <h3 class="font-bold text-blue-400 mb-2">💡 使用说明</h3>
+            <ul class="text-sm text-gray-300 space-y-1">
+                <li>• 点击不同作用域区域查看其中的变量</li>
+                <li>• 在搜索框输入变量名，观察查找过程</li>
+                <li>• 点击"播放动画"观看完整查找演示</li>
+            </ul>
+        </div>
+
+        <!-- 控制面板 -->
+        <div class="flex flex-wrap gap-3 mb-6 justify-center">
+            <input type="text" id="var-search" placeholder="输入变量名搜索..."
+                   class="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 w-48">
+            <button onclick="searchVariable()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+                🔍 查找变量
+            </button>
+            <button onclick="playAnimation()" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition">
+                ▶ 播放动画
+            </button>
+            <button onclick="resetView()" class="px-4 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg transition">
+                ↺ 重置
+            </button>
+        </div>
+
+        <!-- 主可视化区域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 作用域图 -->
+            <div class="lg:col-span-2 bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+                <h3 class="font-bold mb-4 text-lg">作用域层级</h3>
+                <div class="relative aspect-square max-w-md mx-auto" id="scope-container">
+                    <!-- 同心圆作用域 -->
+                    <svg viewBox="0 0 400 400" class="w-full h-full">
+                        <!-- 全局作用域 -->
+                        <circle cx="200" cy="200" r="180" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"
+                                class="scope-ring cursor-pointer" data-scope="global" onclick="selectScope('global')"/>
+                        <text x="200" y="40" text-anchor="middle" fill="#93c5fd" font-size="14">全局作用域</text>
+
+                        <!-- 函数作用域 outer -->
+                        <circle cx="200" cy="200" r="130" fill="#1e4d3a" stroke="#22c55e" stroke-width="2"
+                                class="scope-ring cursor-pointer" data-scope="outer" onclick="selectScope('outer')"/>
+                        <text x="200" y="90" text-anchor="middle" fill="#86efac" font-size="14">outer() 作用域</text>
+
+                        <!-- 函数作用域 inner -->
+                        <circle cx="200" cy="200" r="80" fill="#4c1d4c" stroke="#a855f7" stroke-width="2"
+                                class="scope-ring cursor-pointer" data-scope="inner" onclick="selectScope('inner')"/>
+                        <text x="200" y="140" text-anchor="middle" fill="#d8b4fe" font-size="14">inner() 作用域</text>
+
+                        <!-- 当前执行位置 -->
+                        <circle cx="200" cy="200" r="30" fill="#7c2d12" stroke="#f97316" stroke-width="2"
+                                class="scope-ring cursor-pointer" data-scope="current" onclick="selectScope('current')"/>
+                        <text x="200" y="205" text-anchor="middle" fill="#fed7aa" font-size="12">当前位置</text>
+
+                        <!-- 查找路径动画层 -->
+                        <g id="search-path-group"></g>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 变量面板 -->
+            <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+                <h3 class="font-bold mb-4 text-lg">📦 变量列表</h3>
+
+                <!-- 全局作用域变量 -->
+                <div class="mb-4">
+                    <h4 class="text-blue-400 font-semibold mb-2 flex items-center gap-2">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+                        全局作用域
+                    </h4>
+                    <div class="space-y-1 ml-5" id="global-vars">
+                        <div class="variable-item p-2 rounded text-sm font-mono">
+                            <span class="text-yellow-400">globalVar</span> = <span class="text-green-400">"我是全局变量"</span>
+                        </div>
+                        <div class="variable-item p-2 rounded text-sm font-mono">
+                            <span class="text-yellow-400">outer</span> = <span class="text-purple-400">function</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- outer作用域变量 -->
+                <div class="mb-4">
+                    <h4 class="text-green-400 font-semibold mb-2 flex items-center gap-2">
+                        <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                        outer() 作用域
+                    </h4>
+                    <div class="space-y-1 ml-5" id="outer-vars">
+                        <div class="variable-item p-2 rounded text-sm font-mono">
+                            <span class="text-yellow-400">x</span> = <span class="text-orange-400">10</span>
+                        </div>
+                        <div class="variable-item p-2 rounded text-sm font-mono">
+                            <span class="text-yellow-400">inner</span> = <span class="text-purple-400">function</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- inner作用域变量 -->
+                <div class="mb-4">
+                    <h4 class="text-purple-400 font-semibold mb-2 flex items-center gap-2">
+                        <span class="w-3 h-3 bg-purple-500 rounded-full"></span>
+                        inner() 作用域
+                    </h4>
+                    <div class="space-y-1 ml-5" id="inner-vars">
+                        <div class="variable-item p-2 rounded text-sm font-mono">
+                            <span class="text-yellow-400">y</span> = <span class="text-orange-400">20</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 查找结果 -->
+                <div class="mt-6 p-4 bg-slate-900/50 rounded-lg" id="search-result">
+                    <p class="text-gray-400 text-sm">选择作用域或搜索变量查看详情</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 执行日志 -->
+        <div class="mt-6 bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+            <h3 class="font-bold mb-4 text-lg">📜 执行日志</h3>
+            <div id="log" class="font-mono text-sm space-y-1 max-h-32 overflow-y-auto">
+                <p class="text-gray-400">等待操作...</p>
+            </div>
+        </div>
+
+        <!-- 代码参考 -->
+        <div class="mt-6 bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+            <h3 class="font-bold mb-4 text-lg">📝 对应代码</h3>
+            <pre class="font-mono text-sm overflow-x-auto"><code class="text-gray-300">
+<span class="text-gray-500">// 全局作用域</span>
+<span class="text-purple-400">const</span> <span class="text-yellow-400">globalVar</span> = <span class="text-green-400">"我是全局变量"</span>;
+
+<span class="text-purple-400">function</span> <span class="text-blue-400">outer</span>() {
+    <span class="text-gray-500">// outer 作用域</span>
+    <span class="text-purple-400">const</span> <span class="text-yellow-400">x</span> = <span class="text-orange-400">10</span>;
+
+    <span class="text-purple-400">function</span> <span class="text-blue-400">inner</span>() {
+        <span class="text-gray-500">// inner 作用域 - 当前执行位置</span>
+        <span class="text-purple-400">const</span> <span class="text-yellow-400">y</span> = <span class="text-orange-400">20</span>;
+        console.<span class="text-blue-400">log</span>(x);  <span class="text-gray-500">// 作用域链查找：inner → outer → 找到x=10</span>
+    }
+
+    <span class="text-purple-400">return</span> inner;
+}
+
+<span class="text-purple-400">const</span> <span class="text-yellow-400">fn</span> = <span class="text-blue-400">outer</span>();
+<span class="text-blue-400">fn</span>();  <span class="text-gray-500">// 执行inner函数</span>
+            </code></pre>
+        </div>
+    </div>
+
+    <script>
+        // 作用域数据
+        const scopes = {
+            global: {
+                name: '全局作用域',
+                color: '#3b82f6',
+                variables: [
+                    { name: 'globalVar', value: '"我是全局变量"', type: 'string' },
+                    { name: 'outer', value: 'function', type: 'function' },
+                    { name: 'fn', value: 'function', type: 'function' }
+                ]
+            },
+            outer: {
+                name: 'outer() 作用域',
+                color: '#22c55e',
+                variables: [
+                    { name: 'x', value: '10', type: 'number' },
+                    { name: 'inner', value: 'function', type: 'function' }
+                ]
+            },
+            inner: {
+                name: 'inner() 作用域',
+                color: '#a855f7',
+                variables: [
+                    { name: 'y', value: '20', type: 'number' }
+                ]
+            },
+            current: {
+                name: '当前执行位置',
+                color: '#f97316',
+                variables: [
+                    { name: 'y', value: '20', type: 'number' }
+                ],
+                parent: 'inner'
+            }
+        };
+
+        // 作用域链顺序（从内到外）
+        const scopeChain = ['current', 'inner', 'outer', 'global'];
+
+        let currentScope = null;
+
+        // 选择作用域
+        function selectScope(scopeId) {
+            // 移除之前的active状态
+            document.querySelectorAll('.scope-ring').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // 添加active状态
+            const scopeEl = document.querySelector(`[data-scope="${scopeId}"]`);
+            if (scopeEl) {
+                scopeEl.classList.add('active');
+            }
+
+            currentScope = scopeId;
+            const scope = scopes[scopeId];
+
+            // 显示变量
+            const resultEl = document.getElementById('search-result');
+            let html = `<h4 class="font-bold mb-2" style="color: ${scope.color}">${scope.name}</h4>`;
+            html += '<div class="space-y-1">';
+            scope.variables.forEach(v => {
+                html += `<div class="font-mono text-sm">
+                    <span class="text-yellow-400">${v.name}</span> = <span class="${getTypeColor(v.type)}">${v.value}</span>
+                </div>`;
+            });
+            html += '</div>';
+            resultEl.innerHTML = html;
+
+            addLog(`选择了 ${scope.name}`);
+        }
+
+        // 搜索变量
+        function searchVariable() {
+            const varName = document.getElementById('var-search').value.trim();
+            if (!varName) {
+                alert('请输入变量名');
+                return;
+            }
+
+            resetView();
+            addLog(`开始查找变量: ${varName}`);
+
+            // 模拟作用域链查找
+            let found = false;
+            let delay = 0;
+
+            for (const scopeId of scopeChain) {
+                const scope = scopes[scopeId];
+                const variable = scope.variables.find(v => v.name === varName);
+
+                setTimeout(() => {
+                    selectScope(scopeId);
+
+                    if (variable) {
+                        found = true;
+                        addLog(`✅ 在 ${scope.name} 找到变量 ${varName} = ${variable.value}`, 'success');
+
+                        // 高亮找到的变量
+                        setTimeout(() => {
+                            const resultEl = document.getElementById('search-result');
+                            resultEl.classList.add('found');
+                            setTimeout(() => resultEl.classList.remove('found'), 1500);
+                        }, 300);
+                    } else {
+                        addLog(`❌ ${scope.name} 中未找到 ${varName}，继续向外查找...`, 'warning');
+                    }
+                }, delay);
+
+                if (variable) break;
+                delay += 800;
+            }
+
+            if (!found) {
+                setTimeout(() => {
+                    addLog(`❌ 未找到变量 ${varName}，返回 ReferenceError`, 'error');
+                }, delay + 500);
+            }
+        }
+
+        // 播放动画
+        function playAnimation() {
+            resetView();
+            addLog('🎬 开始演示作用域链查找过程...');
+
+            // 演示查找 x 变量
+            setTimeout(() => {
+                document.getElementById('var-search').value = 'x';
+                searchVariable();
+            }, 500);
+        }
+
+        // 重置视图
+        function resetView() {
+            currentScope = null;
+            document.querySelectorAll('.scope-ring').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById('search-result').innerHTML = '<p class="text-gray-400 text-sm">选择作用域或搜索变量查看详情</p>';
+            document.getElementById('var-search').value = '';
+        }
+
+        // 添加日志
+        function addLog(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const colors = {
+                info: 'text-gray-300',
+                success: 'text-green-400',
+                warning: 'text-yellow-400',
+                error: 'text-red-400'
+            };
+            const time = new Date().toLocaleTimeString();
+            logEl.innerHTML += `<p class="${colors[type]}">[${time}] ${message}</p>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // 获取类型对应的颜色
+        function getTypeColor(type) {
+            const colors = {
+                string: 'text-green-400',
+                number: 'text-orange-400',
+                function: 'text-purple-400'
+            };
+            return colors[type] || 'text-gray-400';
+        }
+
+        // 初始化
+        addLog('作用域链可视化已加载，点击作用域或搜索变量开始探索');
+    </script>
+</body>
+</html>

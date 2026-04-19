@@ -1,0 +1,19 @@
+{
+  "learningDirectory": "D:\\zhk02\\Desktop\\DailyNote\\10_学习",
+  "language": "zh-CN",
+  "defaultTemplate": "standard",
+  "visualization": {
+    "enabled": true,
+    "outputSubdir": "visuals",
+    "defaultTheme": "dark"
+  },
+  "progress": {
+    "autoSave": true,
+    "updateInterval": "onInteraction"
+  },
+  "teaching": {
+    "verificationLevel": "L3",
+    "depthOverSpeed": true,
+    "maxBranchDepth": 2
+  }
+}

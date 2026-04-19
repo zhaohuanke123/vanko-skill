@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>闭包执行过程可视化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .code-line {
+            transition: all 0.3s ease;
+        }
+        .code-line.active {
+            background-color: rgba(59, 130, 246, 0.3);
+            border-left: 3px solid #3b82f6;
+        }
+        .code-line.executed {
+            background-color: rgba(34, 197, 94, 0.1);
+        }
+        .variable-box {
+            transition: all 0.3s ease;
+        }
+        .variable-box.changed {
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .closure-box {
+            border: 2px dashed #a855f7;
+            background: rgba(168, 85, 247, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 to-slate-800 min-h-screen text-white">
+    <div class="container mx-auto p-6 max-w-6xl">
+        <!-- 标题 -->
+        <h1 class="text-3xl font-bold mb-2 text-center">🎯 闭包执行过程可视化</h1>
+        <p class="text-gray-400 text-center mb-6">观察闭包如何"记住"外部变量</p>
+
+        <!-- 使用说明 -->
+        <div class="bg-slate-800/50 rounded-lg p-4 mb-6 border border-slate-700">
+            <h3 class="font-bold text-blue-400 mb-2">💡 使用说明</h3>
+            <ul class="text-sm text-gray-300 space-y-1">
+                <li>• 点击"下一步"逐行执行代码，观察变量变化</li>
+                <li>• 注意观察闭包形成时，函数如何"捕获"外部变量</li>
+                <li>• 点击"运行全部"自动执行完整流程</li>
+            </ul>
+        </div>
+
+        <!-- 控制按钮 -->
+        <div class="flex flex-wrap gap-3 mb-6 justify-center">
+            <button onclick="stepForward()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition flex items-center gap-2">
+                下一步 <span class="text-lg">→</span>
+            </button>
+            <button onclick="runAll()" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition flex items-center gap-2">
+                <span>▶</span> 运行全部
+            </button>
+            <button onclick="reset()" class="px-4 py-2 bg-slate-600 hover:bg-slate-500 rounded-lg transition flex items-center gap-2">
+                <span>↺</span> 重置
+            </button>
+            <div class="flex items-center gap-2 ml-4">
+                <label class="text-sm text-gray-400">速度:</label>
+                <input type="range" id="speed" min="200" max="2000" value="800" class="w-24">
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 代码区域 -->
+            <div class="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700">
+                <div class="bg-slate-700 px-4 py-2 flex items-center gap-2">
+                    <span class="text-red-400">●</span>
+                    <span class="text-yellow-400">●</span>
+                    <span class="text-green-400">●</span>
+                    <span class="ml-2 text-gray-300 font-mono text-sm">closure-demo.js</span>
+                </div>
+                <div class="p-4 font-mono text-sm" id="code-container">
+                    <!-- 代码行会被动态渲染 -->
+                </div>
+            </div>
+
+            <!-- 变量状态区域 -->
+            <div class="space-y-4">
+                <!-- 当前作用域变量 -->
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                    <h3 class="font-bold mb-3 text-lg flex items-center gap-2">
+                        <span class="text-blue-400">📦</span> 当前变量状态
+                    </h3>
+                    <div id="variables" class="space-y-2">
+                        <p class="text-gray-400 text-sm">等待执行...</p>
+                    </div>
+                </div>
+
+                <!-- 闭包环境 -->
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                    <h3 class="font-bold mb-3 text-lg flex items-center gap-2">
+                        <span class="text-purple-400">🔗</span> 闭包环境
+                    </h3>
+                    <div id="closure-env" class="space-y-2">
+                        <p class="text-gray-400 text-sm">闭包尚未形成...</p>
+                    </div>
+                </div>
+
+                <!-- 输出区域 -->
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                    <h3 class="font-bold mb-3 text-lg flex items-center gap-2">
+                        <span class="text-green-400">📺</span> 输出
+                    </h3>
+                    <div id="output" class="font-mono text-sm space-y-1">
+                        <p class="text-gray-400">等待输出...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 执行说明 -->
+        <div class="mt-6 bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+            <h3 class="font-bold mb-4 text-lg">📖 当前步骤说明</h3>
+            <div id="explanation" class="text-gray-300">
+                <p>点击"下一步"开始执行代码</p>
+            </div>
+        </div>
+
+        <!-- 闭包原理说明 -->
+        <div class="mt-6 bg-purple-900/30 rounded-xl p-6 border border-purple-700/50">
+            <h3 class="font-bold mb-4 text-lg text-purple-300">💡 闭包原理</h3>
+            <div class="text-gray-300 space-y-2">
+                <p><strong>闭包 = 函数 + 词法环境</strong></p>
+                <p>当内部函数被创建时，它会"记住"创建时所在作用域的所有变量。</p>
+                <p>即使外部函数已经执行完毕，内部函数仍然可以访问这些变量。</p>
+                <p class="mt-4 text-purple-300">👉 观察本例：<code class="bg-slate-800 px-2 py-1 rounded">inner</code> 函数记住了 <code class="bg-slate-800 px-2 py-1 rounded">x = 10</code></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 代码行
+        const codeLines = [
+            { num: 1, code: '<span class="text-gray-500">// 定义外部函数</span>', exec: false },
+            { num: 2, code: '<span class="text-purple-400">function</span> <span class="text-blue-400">outer</span>() {', exec: false },
+            { num: 3, code: '    <span class="text-purple-400">let</span> <span class="text-yellow-400">x</span> = <span class="text-orange-400">10</span>;  <span class="text-gray-500">// 外部变量</span>', exec: false },
+            { num: 4, code: '    ', exec: false },
+            { num: 5, code: '    <span class="text-purple-400">function</span> <span class="text-blue-400">inner</span>() {', exec: false },
+            { num: 6, code: '        <span class="text-purple-400">let</span> <span class="text-yellow-400">y</span> = <span class="text-orange-400">20</span>;', exec: false },
+            { num: 7, code: '        <span class="text-purple-400">return</span> x + y;  <span class="text-gray-500">// 访问外部变量x</span>', exec: false },
+            { num: 8, code: '    }', exec: false },
+            { num: 9, code: '    ', exec: false },
+            { num: 10, code: '    <span class="text-purple-400">return</span> inner;  <span class="text-gray-500">// 返回内部函数（闭包形成）</span>', exec: false },
+            { num: 11, code: '}', exec: false },
+            { num: 12, code: '', exec: false },
+            { num: 13, code: '<span class="text-gray-500">// 调用外部函数</span>', exec: false },
+            { num: 14, code: '<span class="text-purple-400">const</span> <span class="text-yellow-400">fn</span> = <span class="text-blue-400">outer</span>();  <span class="text-gray-500">// fn现在是一个闭包</span>', exec: false },
+            { num: 15, code: '', exec: false },
+            { num: 16, code: '<span class="text-gray-500">// 调用闭包</span>', exec: false },
+            { num: 17, code: '<span class="text-purple-400">const</span> <span class="text-yellow-400">result</span> = <span class="text-blue-400">fn</span>();  <span class="text-gray-500">// 执行inner，访问x</span>', exec: false },
+            { num: 18, code: '', exec: false },
+            { num: 19, code: 'console.<span class="text-blue-400">log</span>(result);  <span class="text-gray-500">// 输出: 30</span>', exec: false },
+        ];
+
+        // 执行步骤
+        const steps = [
+            {
+                line: 2,
+                action: '定义 outer 函数',
+                explanation: '首先定义外部函数 outer。此时函数体内部的代码还未执行。',
+                vars: {},
+                closure: null
+            },
+            {
+                line: 14,
+                action: '调用 outer()',
+                explanation: '调用 outer 函数，进入 outer 的执行上下文。',
+                vars: {},
+                closure: null
+            },
+            {
+                line: 3,
+                action: '声明变量 x = 10',
+                explanation: '在 outer 作用域中声明变量 x，赋值为 10。',
+                vars: { x: 10 },
+                closure: null
+            },
+            {
+                line: 5,
+                action: '定义 inner 函数',
+                explanation: '定义内部函数 inner。此时 inner 函数对象被创建，但未执行。',
+                vars: { x: 10 },
+                closure: null
+            },
+            {
+                line: 10,
+                action: '返回 inner 函数（闭包形成！）',
+                explanation: '<strong class="text-purple-400">🔑 关键时刻：闭包形成！</strong><br>inner 函数被返回时，它"捕获"了创建时作用域中的变量 x = 10。<br>这个"函数 + 捕获的变量"的组合就是闭包。',
+                vars: { x: 10 },
+                closure: { x: 10 }
+            },
+            {
+                line: 14,
+                action: 'fn 接收返回的闭包',
+                explanation: 'fn 变量现在持有 inner 函数的引用，以及它捕获的词法环境（x = 10）。<br>outer 函数执行完毕，其执行上下文被销毁，但变量 x 被闭包保留！',
+                vars: { fn: 'closure', x: '(闭包中)' },
+                closure: { x: 10 }
+            },
+            {
+                line: 17,
+                action: '调用 fn() 即 inner()',
+                explanation: '调用 fn 实际上是执行 inner 函数。inner 通过闭包访问外部变量 x。',
+                vars: { fn: 'closure' },
+                closure: { x: 10 }
+            },
+            {
+                line: 6,
+                action: '声明变量 y = 20',
+                explanation: '在 inner 作用域中声明局部变量 y。',
+                vars: { fn: 'closure', y: 20 },
+                closure: { x: 10 }
+            },
+            {
+                line: 7,
+                action: '计算 x + y',
+                explanation: '计算 x + y：<br>• y = 20（inner 作用域的局部变量）<br>• x = 10（通过闭包从词法环境获取）<br>• 结果 = 30',
+                vars: { fn: 'closure', y: 20, result: 30 },
+                closure: { x: 10 }
+            },
+            {
+                line: 19,
+                action: '输出结果',
+                explanation: '输出计算结果 30。<br><br>✅ 闭包成功"记住"了外部变量 x，即使 outer 函数早已执行完毕！',
+                vars: { fn: 'closure', result: 30 },
+                closure: { x: 10 },
+                output: '30'
+            }
+        ];
+
+        let currentStep = 0;
+        let executedLines = new Set();
+        let isRunning = false;
+
+        // 初始化代码显示
+        function initCode() {
+            const container = document.getElementById('code-container');
+            container.innerHTML = codeLines.map(line => `
+                <div class="code-line flex py-1 px-2 -mx-2 rounded" data-line="${line.num}">
+                    <span class="text-gray-500 w-8 text-right mr-4 select-none">${line.num}</span>
+                    <span>${line.code}</span>
+                </div>
+            `).join('');
+        }
+
+        // 高亮代码行
+        function highlightLine(lineNum) {
+            document.querySelectorAll('.code-line').forEach(el => {
+                el.classList.remove('active');
+                if (executedLines.has(parseInt(el.dataset.line))) {
+                    el.classList.add('executed');
+                }
+            });
+
+            const lineEl = document.querySelector(`[data-line="${lineNum}"]`);
+            if (lineEl) {
+                lineEl.classList.add('active');
+            }
+        }
+
+        // 更新变量显示
+        function updateVariables(vars) {
+            const container = document.getElementById('variables');
+            if (Object.keys(vars).length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-sm">当前作用域无变量</p>';
+                return;
+            }
+
+            container.innerHTML = Object.entries(vars).map(([name, value]) => `
+                <div class="variable-box flex items-center gap-2 p-2 bg-slate-700/50 rounded">
+                    <span class="text-yellow-400 font-mono">${name}</span>
+                    <span class="text-gray-400">=</span>
+                    <span class="${typeof value === 'number' ? 'text-orange-400' : 'text-purple-400'} font-mono">${value}</span>
+                </div>
+            `).join('');
+        }
+
+        // 更新闭包环境显示
+        function updateClosure(closure) {
+            const container = document.getElementById('closure-env');
+            if (!closure) {
+                container.innerHTML = '<p class="text-gray-400 text-sm">闭包尚未形成...</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="closure-box p-3 rounded-lg">
+                    <p class="text-purple-300 font-bold mb-2">✅ 闭包已形成</p>
+                    <p class="text-gray-400 text-sm mb-2">捕获的变量：</p>
+                    ${Object.entries(closure).map(([name, value]) => `
+                        <div class="flex items-center gap-2 p-2 bg-slate-700/50 rounded">
+                            <span class="text-yellow-400 font-mono">${name}</span>
+                            <span class="text-gray-400">=</span>
+                            <span class="text-orange-400 font-mono">${value}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // 添加输出
+        function addOutput(text) {
+            const container = document.getElementById('output');
+            container.innerHTML = `<p class="text-green-400">> ${text}</p>`;
+        }
+
+        // 更新说明
+        function updateExplanation(text) {
+            document.getElementById('explanation').innerHTML = `<p>${text}</p>`;
+        }
+
+        // 执行下一步
+        function stepForward() {
+            if (currentStep >= steps.length) {
+                updateExplanation('✅ 代码执行完毕！闭包成功演示了如何"记住"外部变量。');
+                return;
+            }
+
+            const step = steps[currentStep];
+            executedLines.add(step.line);
+            highlightLine(step.line);
+            updateVariables(step.vars);
+            updateClosure(step.closure);
+            updateExplanation(step.explanation);
+
+            if (step.output) {
+                addOutput(step.output);
+            }
+
+            currentStep++;
+        }
+
+        // 运行全部
+        async function runAll() {
+            if (isRunning) return;
+            isRunning = true;
+
+            reset();
+
+            for (let i = 0; i < steps.length; i++) {
+                stepForward();
+                await sleep(parseInt(document.getElementById('speed').value));
+            }
+
+            isRunning = false;
+        }
+
+        // 重置
+        function reset() {
+            currentStep = 0;
+            executedLines = new Set();
+            isRunning = false;
+
+            initCode();
+            document.getElementById('variables').innerHTML = '<p class="text-gray-400 text-sm">等待执行...</p>';
+            document.getElementById('closure-env').innerHTML = '<p class="text-gray-400 text-sm">闭包尚未形成...</p>';
+            document.getElementById('output').innerHTML = '<p class="text-gray-400">等待输出...</p>';
+            updateExplanation('点击"下一步"开始执行代码');
+        }
+
+        // 辅助函数
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // 初始化
+        initCode();
+    </script>
+</body>
+</html>
