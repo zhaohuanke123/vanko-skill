@@ -27,6 +27,18 @@ A structured development workflow for fullstack projects with verification gates
 - **Blocking Protocol**: Clear handling of tasks that require human intervention
 - **Rollback Support**: Clean recovery from failed implementations
 
+### interactive-learning
+
+Interactive learning system based on Bloom's "2 Sigma Problem" and mastery learning principles.
+
+**Features:**
+- **Dialog-Based Verification**: AI generates questions dynamically, asks follow-up questions to verify understanding
+- **Mastery Learning**: Only proceed when truly understanding (L3 application level)
+- **Branch Exploration**: Dive deep into concepts that interest you, return to main path anytime
+- **Progress Tracking**: Resume learning across conversations, never lose context
+- **Feynman Method**: Learn by explaining, AI helps you find knowledge gaps
+- **Error Correction**: Correct AI mistakes, make learning a collaborative process
+
 ## Installation
 
 ### From GitHub Marketplace
@@ -43,6 +55,9 @@ A structured development workflow for fullstack projects with verification gates
 
 # Coding workflow
 /plugin install coding-workflow@zhaohuanke123-vanko-skill
+
+# Interactive learning
+/plugin install interactive-learning@zhaohuanke123-vanko-skill
 ```
 
 ### Local Development
@@ -60,6 +75,9 @@ claude --plugin-dir ./vanko-skill
 
 # Coding workflow
 /coding-workflow:coding-workflow
+
+# Interactive learning
+/interactive-learning:interactive-learning
 ```
 
 ## Required Artifacts
@@ -81,6 +99,15 @@ claude --plugin-dir ./vanko-skill
 | `progress.txt` | Session history and context |
 | `architecture.md` | System design decisions |
 | `init.sh` | Environment setup script |
+
+### For interactive-learning
+
+| File | Purpose |
+|------|---------|
+| `进度.md` | Learning progress and current state |
+| `知识图谱.md` | Learning path and concept relationships |
+| `XX_标题.md` | Course files with content and checkpoint records |
+| `config.json` | Learning directory and teaching settings |
 
 ## License
 

@@ -25,6 +25,15 @@
       "skills": [
         "./skills/coding-workflow"
       ]
+    },
+    {
+      "name": "interactive-learning",
+      "description": "Interactive learning system based on Bloom's 2 Sigma Problem and mastery learning principles. Features dialog-based checkpoint verification, branch exploration, and progress tracking across conversations.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/interactive-learning"
+      ]
     }
   ]
 }
