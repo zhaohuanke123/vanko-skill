@@ -40,6 +40,7 @@ Interactive learning system based on Bloom's "2 Sigma Problem" and mastery learn
 - **Error Correction**: Correct AI mistakes, make learning a collaborative process
 - **Source Citations**: Generate courses based on your documents, books, or websites with proper citations
 - **Obsidian Integration**: Auto-add `^block-id` for precise note references
+- **Spaced Repetition**: Ebbinghaus forgetting curve review system (20min, 1h, 1d, 2d, 6d, 31d)
 
 ## Installation
 
@@ -108,6 +109,7 @@ claude --plugin-dir ./vanko-skill
 |------|---------|
 | `进度.md` | Learning progress and current state |
 | `知识图谱.md` | Learning path and concept relationships |
+| `复习计划.md` | Spaced repetition review schedule |
 | `参考资料.md` | Source materials library for the topic |
 | `books/` | Local books and documents (PDF, MD, TXT) |
 | `XX_标题.md` | Course files with content and checkpoint records |
@@ -120,6 +122,13 @@ claude --plugin-dir ./vanko-skill
 | Obsidian notes | `[[notes/topic]]` |
 | Websites | `https://example.com/article` |
 | Books | `《Book Name》Chapter X` |
+
+**Review Commands:**
+| Command | Description |
+|---------|-------------|
+| `复习` | Start reviewing due courses |
+| `今日复习` | View today's review tasks |
+| `复习计划` | View full review schedule |
 
 ## License
 
