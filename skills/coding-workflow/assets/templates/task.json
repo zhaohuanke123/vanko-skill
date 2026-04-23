@@ -16,7 +16,9 @@
       ],
       "passes": false,
       "priority": "critical",
-      "dependencies": []
+      "dependencies": [],
+      "files": ["package.json", "tsconfig.json", "tailwind.config.ts", ".env.local.example"],
+      "conflict_groups": ["config"]
     },
     {
       "id": 2,
@@ -31,7 +33,9 @@
       ],
       "passes": false,
       "priority": "high",
-      "dependencies": [1]
+      "dependencies": [1],
+      "files": ["supabase/migrations/"],
+      "conflict_groups": []
     },
     {
       "id": 3,
@@ -47,6 +51,8 @@
       "passes": false,
       "priority": "high",
       "dependencies": [1, 2],
+      "files": ["src/app/login/", "src/app/register/", "src/components/auth/"],
+      "conflict_groups": ["ui"],
       "testing": "browser"
     }
   ],
