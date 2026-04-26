@@ -1,198 +1,175 @@
-# Architecture Generation Guide
+# Architecture Deployment Guide
 
-指导 AI 如何为项目生成 AGENTS.md 和 architecture.md，遵循 Harness Engineering 理念。
+指导 AI 如何部署 Harness Engineering 架构文件到项目目录。
+
+---
 
 ## 核心理念
 
-### 仓库即记录系统
-
-不在仓库里的东西，对智能体不存在。一切决策、规范必须版本化。
-
-### 地图而非手册
-
-AGENTS.md 是目录页（~60-100 行），不是百科全书。从小入口点开始，渐进式披露。
-
----
-
-## 触发条件
-
-当以下情况发生时，触发架构生成：
-
-- 项目没有 `AGENTS.md` 或 `architecture.md`
-- 用户说 "开始新项目"、"初始化项目"、"生成架构"
-- 用户描述需求但项目没有架构文档
-- executor 启动时发现架构文件缺失
-
----
-
-## 生成流程
-
-### Step 1: 需求收集
-
-向用户询问以下信息（如未提供）：
-
-1. **项目目标** - 这个系统要解决什么问题？
-2. **核心功能** - 必须实现哪些功能？
-3. **技术偏好** - 有无技术栈偏好？（框架、语言、数据库）
-4. **约束条件** - 有哪些硬性约束？（预算、时间、团队技能、合规要求）
-
-### Step 2: 技术栈决策
-
-根据需求选择技术栈，填写 Tech Stack 表格：
-
-| Layer | Technology | Reason |
-|-------|------------|--------|
-| Frontend | [选择] | [为什么选择这个] |
-| Backend | [选择] | [为什么选择这个] |
-| Database | [选择] | [为什么选择这个] |
-| Auth | [选择] | [为什么选择这个] |
-
-**决策原则**：
-- 优先选择"无聊"技术（API 稳定、训练集覆盖好）
-- 考虑团队熟悉度
-- 考虑生态系统成熟度
-
-### Step 3: 目录结构设计
-
-根据技术栈设计目录结构，遵循框架最佳实践。
-
-**通用原则**：
-- 按功能模块组织，而非技术类型
-- 每个目录有单一职责
-- 目录层级不超过 4 层
-
-### Step 4: 数据模型设计
-
-识别核心实体，定义关系：
-
-| Entity | Fields | Relations |
-|--------|--------|-----------|
-| [实体名] | [字段列表] | [与其他实体的关系] |
-
-### Step 5: API 设计
-
-定义 API 端点命名和格式约定：
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | /api/[resource] | [描述] |
-| POST | /api/[resource] | [描述] |
-
-### Step 6: 关键约束提取
-
-从需求中提取不可违反的约束：
-
-**必须遵守**：
-- [约束1]：[原因和后果]
-- [约束2]：[原因和后果]
-
-**禁止事项**：
-- [禁止事项1]：[原因]
-- [禁止事项2]：[原因]
-
----
-
-## AGENTS.md 生成规则
-
-### 生成策略（智能判断）
-
-1. **根目录必须生成** - 每个项目必须有 `<project-root>/AGENTS.md`
-
-2. **子目录智能判断** - 根据以下条件决定是否生成：
-   - 目录下有 3+ 个子目录 或 5+ 个文件 → 生成
-   - 目录有明确的职责边界（如 `src/components/`、`src/lib/`）→ 生成
-   - 目录是叶子目录（只有具体代码文件）→ 不生成
-
-### 内容结构（控制在 60-100 行）
-
-```markdown
-# [目录名] 导航
-
-## 这是什么
-[1-2 句话说明这个目录的职责]
-
-## 目录结构
-[简要的目录树或表格]
-
-## 关键约定
-[这个目录特有的约束，如命名规范、导出规则等]
-
-## 下一步
-[指向更深层文档或相关目录的链接]
-```
-
-### 示例判断
+**Skill 是"安装器"，项目文件是"运行时"**
 
 ```
-src/                    → 生成（有多个子目录）
-src/app/                → 生成（Next.js App Router，职责明确）
-src/app/api/            → 生成（有多个路由文件）
-src/app/api/users/      → 不生成（叶子目录，只有 route.ts）
-src/components/         → 生成（组件库，职责明确）
-src/components/ui/      → 可能生成（取决于文件数量）
-src/lib/                → 生成（工具库，职责明确）
-src/lib/db/             → 不生成（叶子目录）
+AI 读取 skill（一次性）→ 部署架构文件 → 后续只读项目文件自驱动
 ```
 
 ---
 
-## architecture.md 生成规则
+## 部署检查
 
-### 必需章节
+检查项目根目录是否存在以下文件：
 
-以下章节必须在 `architecture.md` 中定义：
-
-| 章节 | 用途 | 内容要求 |
-|------|------|----------|
-| `## Overview` | 系统目标概述 | 1-2 段话描述系统要解决什么问题 |
-| `## Tech Stack` | 技术栈清单 | 使用表格格式，包含 Layer、Technology、Reason |
-| `## Directory Structure` | 目录结构约定 | 目录树 + 每个目录的职责说明 |
-| `## Data Model` | 数据模型定义 | 核心实体、字段、关系 |
-| `## API Design` | API 端点约定 | 端点表格 + 命名规范 |
-| `## Key Constraints` | 关键约束 | 必须遵守 + 禁止事项 |
-
-### 推荐章节
-
-| 章节 | 用途 |
-|------|------|
-| `## Environment Variables` | 环境变量清单 |
-| `## Key Design Decisions` | 重要设计决策及理由 |
-
-### 约束类型
-
-**硬约束**：违反会导致代码无法运行或严重问题
-- 使用的框架和版本
-- 数据库 schema
-- 认证机制
-- 环境变量
-
-**软约束**：推荐但可变通的约束
-- 代码风格偏好
-- 组件组织方式
-- 测试策略
+| 文件 | 必须存在 | 检查逻辑 |
+|------|----------|----------|
+| `AGENTS.md` | ✅ | 导航入口，AI 新对话首先读取 |
+| `WORKFLOW.md` | ✅ | 工作流程指南 |
+| `architecture.md` | ✅ | 架构约束 |
+| `task.json` | ⚠️ | 任务定义，可使用模板 |
+| `progress.txt` | ⚠️ | 开发历史，可使用模板 |
 
 ---
 
-## 验证
+## 部署流程
 
-生成后运行验证脚本检查完整性：
+### Step 1: 收集项目信息
+
+向用户询问（如未提供）：
+
+1. **项目名称** - 用于 AGENTS.md 标题
+2. **项目目标** - 1-2 句话描述
+3. **技术栈** - Frontend/Backend/Database/Auth
+4. **核心功能** - 主要功能点
+5. **约束条件** - 禁止事项、必须遵守的规则
+
+### Step 2: 部署 AGENTS.md
+
+使用模板 `assets/templates/AGENTS.md`：
+
+- 填充项目名称
+- 填充项目描述
+- 填充目录结构（根据技术栈）
+- 填充关键约定
+- 控制在 ~60 行
+
+### Step 3: 部署 WORKFLOW.md
+
+使用模板 `assets/templates/WORKFLOW.md`：
+
+- 直接复制，无需修改
+- 包含完整工作流程
+
+### Step 4: 部署 architecture.md
+
+使用模板 `assets/templates/architecture.md`：
+
+- 填充 Overview
+- 填充 Tech Stack 表格（含选择理由）
+- 填充 Directory Structure
+- 填充 Data Model
+- 填充 API Design
+- 填充 Key Constraints（必须遵守 + 禁止事项）
+
+### Step 5: 部署 task.json（如不存在）
+
+使用模板 `assets/templates/task.json`：
+
+- 填充项目名称和描述
+- 可保留示例任务或清空
+
+### Step 6: 部署 progress.txt（如不存在）
+
+使用模板 `assets/templates/progress.txt`：
+
+- 初始化为空或添加第一条记录
+
+### Step 7: 验证部署
+
+运行验证脚本：
 
 ```bash
 python scripts/validate_architecture.py --architecture-file architecture.md
 ```
 
-验证内容：
-- 所有必需章节存在
-- Tech Stack 使用表格格式
-- Directory Structure 与实际目录一致（可选）
+确保所有必需章节存在。
 
 ---
 
-## 模板文件
+## 模板文件位置
 
-使用以下模板作为起点：
+所有模板位于 `skills/coding-workflow/assets/templates/`：
 
-- `assets/templates/AGENTS.md` - 项目导航入口模板
-- `assets/templates/architecture.md` - 架构文档模板
+| 模板 | 用途 | 部署后位置 |
+|------|------|------------|
+| `AGENTS.md` | 导航入口 | `<project-root>/AGENTS.md` |
+| `WORKFLOW.md` | 工作流程 | `<project-root>/WORKFLOW.md` |
+| `architecture.md` | 架构约束 | `<project-root>/architecture.md` |
+| `task.json` | 任务定义 | `<project-root>/task.json` |
+| `progress.txt` | 进度记录 | `<project-root>/progress.txt` |
 
-根据项目需求填充具体内容。
+---
+
+## AGENTS.md 智能生成策略
+
+根目录必须生成，子目录根据复杂度判断：
+
+**判断规则**：
+
+- 目录有 3+ 子目录 或 5+ 文件 → 生成
+- 目录有明确职责边界（如 `src/components/`）→ 生成
+- 目录是叶子目录（只有代码文件）→ 不生成
+
+**示例**：
+
+```
+src/                    → 生成（有多个子目录）
+src/app/                → 生成（职责明确）
+src/app/api/            → 生成（有多个路由）
+src/app/api/users/      → 不生成（叶子目录）
+src/components/         → 生成（组件库）
+src/lib/                → 生成（工具库）
+src/lib/db/             → 不生成（叶子目录）
+```
+
+---
+
+## 完成提示
+
+部署完成后告诉用户：
+
+```
+项目已初始化完成。部署的文件：
+- AGENTS.md（导航入口）
+- WORKFLOW.md（工作流程）
+- architecture.md（架构约束）
+- task.json（任务模板）
+- progress.txt（进度记录）
+
+后续开发：
+- 新对话时，AI 只需读取 AGENTS.md 即可自驱动
+- AI 会按渐进式披露原则，按需读取其他文件
+- 不需要再次调用 coding-workflow skill
+```
+
+---
+
+## 已初始化项目处理
+
+如果项目已有完整架构文件：
+
+```
+项目已初始化，架构文件完整。
+
+后续开发：
+- 新对话时读取 AGENTS.md 即可
+- AI 会自动读取 WORKFLOW.md、architecture.md、task.json
+- 按渐进式披露原则，按需读取必要文件
+```
+
+---
+
+## 验证脚本
+
+| 脚本 | 用途 |
+|------|------|
+| `scripts/validate_architecture.py` | 验证 architecture.md 必需章节 |
+| `scripts/validate_iteration.py` | 验证迭代一致性 |
+| `scripts/plan_batches.py` | 分析任务依赖和并行批次 |
