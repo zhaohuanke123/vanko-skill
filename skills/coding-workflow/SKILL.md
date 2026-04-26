@@ -12,6 +12,20 @@ license: Apache-2.0
 
 A disciplined workflow for implementing fullstack features with parallel subagent execution, git worktree isolation, and independent verification.
 
+---
+
+> **⚠️ FIRST: Check Project Architecture Files**
+>
+> Before any task execution, check if these files exist in the project:
+> - `<project-root>/AGENTS.md` — Project navigation entry
+> - `<project-root>/architecture.md` — Architecture constraints (tech stack, directory structure, key constraints)
+>
+> If missing, run **Mode 5: Initialize Project** to generate them.
+>
+> All code changes MUST comply with `architecture.md` constraints.
+
+---
+
 ## Architecture
 
 ```
@@ -76,6 +90,20 @@ When user says "run all" or "execute all ready tasks":
 1. Run `plan_batches.py` to get all batches
 2. Execute every batch in sequence (tasks within each batch run in parallel)
 3. Report full results at the end
+
+### Mode 5: Initialize Project
+
+When user says "init project", "initialize", "开始新项目", or project lacks architecture files:
+
+1. Check if `AGENTS.md` and `architecture.md` exist
+2. If missing, follow the architecture generation flow:
+   - Read `references/architecture-generation.md` for guidance
+   - Collect requirements from user (project goal, features, tech preferences)
+   - Generate `AGENTS.md` (project navigation entry, ~60-100 lines)
+   - Generate `architecture.md` (architecture constraints)
+   - Use templates from `assets/templates/`
+3. Run `python scripts/validate_architecture.py` to verify completeness
+4. Report generated files and ask user to review
 
 ---
 
@@ -152,14 +180,21 @@ Spawn one executor subagent per task in the batch, all in parallel using the Age
 - Instructions from `agents/executor.md`
 - Task definition (id, title, steps)
 - Worktree path (e.g., `.worktrees/task-5/`)
-- Project conventions reference
+- Architecture files reference
 
 Example Agent call for one task:
 
 ```
 Read agents/executor.md for your instructions.
 
-Your task:
+=== MANDATORY FIRST STEPS ===
+Before writing any code, you MUST:
+1. Read <project-root>/AGENTS.md for project navigation
+2. Read <project-root>/architecture.md for architecture constraints
+3. If either file does not exist, pause and trigger architecture generation (see references/architecture-generation.md)
+4. Read <project-root>/CLAUDE.md if it exists for project-specific instructions
+
+=== YOUR TASK ===
 - Task ID: 5
 - Title: Add user profile page
 - Steps:
@@ -168,12 +203,12 @@ Your task:
   3. Implement edit mode with form
   4. Add save functionality with API call
 
-Your worktree: .worktrees/task-5/
-Your branch: feature/task-5
+=== YOUR ENVIRONMENT ===
+- Worktree: .worktrees/task-5/
+- Branch: feature/task-5
+- Working directory: <project-root>
 
-Working directory: <project-root>
-
-Read agents/executor.md first, then implement the task.
+Read agents/executor.md first, follow the startup protocol, then implement the task.
 ```
 
 **Spawn all executors in the same turn** so they run in parallel. Wait for all to complete before proceeding.
@@ -408,6 +443,7 @@ Human action required:
 6. **Block, Don't Fake** — When stuck, report and stop; don't mark as complete
 7. **Clean Up Worktrees** — Always remove worktrees and branches after processing
 8. **Merge One At A Time** — Merge worktree branches sequentially to handle conflicts
+9. **Architecture First** — Ensure AGENTS.md and architecture.md exist before any task execution
 
 ---
 
@@ -417,9 +453,10 @@ Human action required:
 
 | File | Purpose | Created By |
 |------|---------|------------|
+| `AGENTS.md` | Project navigation entry (~60-100 lines) | AI (via architecture generation) |
+| `architecture.md` | Architecture constraints (tech stack, directory, constraints) | AI (via architecture generation) |
 | `task.json` | Task definitions (source of truth) | Human |
 | `progress.txt` | Session history and context | Orchestrator |
-| `architecture.md` | System design decisions | Human |
 | `init.sh` | Environment setup script | Human |
 
 ### Skill Bundle Files
@@ -429,13 +466,16 @@ Human action required:
 | `scripts/plan_batches.py` | Dependency analysis and batch grouping |
 | `scripts/select_next_task.py` | Single-task selection (for non-parallel mode) |
 | `scripts/validate_iteration.py` | Post-merge validation |
+| `scripts/validate_architecture.py` | Architecture document validation |
 | `agents/executor.md` | Execution subagent instructions |
 | `agents/verifier.md` | Verification subagent instructions |
+| `references/architecture-generation.md` | Guide for generating AGENTS.md and architecture.md |
 
 **Templates available in `assets/templates/`:**
+- `AGENTS.md` - Project navigation entry template
+- `architecture.md` - Architecture doc template with required sections
 - `task.json` - Task definition template (includes `files` and `conflict_groups` fields)
 - `progress.txt` - Progress log template
-- `architecture.md` - Architecture doc template
 - `init.sh` - Initialization script template
 
 ---
@@ -447,6 +487,7 @@ Human action required:
 | `status` | Show task completion status and parallelizability |
 | `next` | Execute next batch of parallelizable tasks |
 | `init` | Run initialization script |
+| `init-project` | Generate AGENTS.md and architecture.md for new project |
 | `test` | Run lint and build verification |
 | `run-all` | Execute all ready tasks across all batches |
 
