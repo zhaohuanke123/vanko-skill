@@ -33,6 +33,33 @@
 
 ---
 
+## Memory Adapter
+
+Memory 可以提醒 agent 读取本文件，但不能替代本文件或项目状态文件。
+
+如果 memory 与项目文件冲突，按以下优先级处理：
+
+```text
+用户最新明确指令
+> PROJECT.md / docs/* / task.json / progress.txt
+> AGENTS.md / WORKFLOW.md / CLAUDE.md
+> skill instructions
+> memory hints
+```
+
+冲突示例：
+- memory 说任务完成，但 `task.json` 未完成 → 任务未完成。
+- memory 说可以直接改源码，但 `WORKFLOW.md` 要求 Documentation Gate → 先过 gate。
+- memory 记得旧设计，但 `docs/design.md` 已更新 → 以 `docs/design.md` 为准。
+
+推荐 memory 只保存：
+
+```text
+For projects using software-dev/coding-workflow: read AGENTS.md first, then PROJECT.md and WORKFLOW.md. Memory is only a routing hint; repo files are the source of truth. Pass the Documentation Gate before source edits.
+```
+
+---
+
 ## Documentation Gate
 
 任何 bug、功能、行为变更都不能直接改源码。编码前必须：
@@ -62,6 +89,19 @@
 | [task.json](task.json) | 任务定义、依赖、文档引用 | 需要知道做什么时 |
 | [progress.txt](progress.txt) | 开发历史、文档更新、测试证据 | 需要了解上下文时 |
 | [CLAUDE.md](CLAUDE.md) | 项目特定指令 | 如存在则读取 |
+
+---
+
+## 经验教训归档
+
+| 内容 | 写入位置 |
+|------|----------|
+| 当前任务流水、测试证据、阻塞 | `progress.txt` |
+| 当前项目可复用经验 | `docs/lessons-learned.md` |
+| 跨项目、可改进 skill 的经验 | skill 的 `references/lessons-from-history.md` |
+| 去哪里查经验的提醒 | memory |
+
+Memory 不保存经验正文作为唯一来源。
 
 ---
 

@@ -10,6 +10,7 @@ Load this file when handling exceptions, recovery, or phase-gate decisions.
 | `CLAUDE.md` missing but `PROJECT.md` exists | Project state exists without generic agent entry | Create `CLAUDE.md` from existing docs and commands before continuing |
 | `AGENTS.md` or `WORKFLOW.md` missing | Project has lifecycle docs but no runtime navigation or execution gate | Create them from current docs before development work continues |
 | Docs and implementation disagree | Requirement/design says one thing but code/tests do another | Stop feature work, choose source of truth, then update docs before code |
+| Memory disagrees with repo files | Memory says different phase, task state, design, test, or release status than project files | Treat memory as a routing hint only; trust repo files and continue from `AGENTS.md`, `PROJECT.md`, and current docs |
 | User reports a bug or broken behavior | "bug", "broken", "wrong", "fix", or behavior mismatch | Run Issue/Bug Triage: identify governing docs, update docs if behavior changes, then edit code |
 | User asks to skip documentation | "just code", "no docs", "skip docs", similar | Warn once; if confirmed, record skip, risk, and follow-up docs in `PROJECT.md` or `progress.txt` |
 | Version history missing | Delivered/versioned `PROJECT.md` but no `docs/version-history.md` | Create it from README, test results, and `PROJECT.md`; mark uncertain entries as inferred |

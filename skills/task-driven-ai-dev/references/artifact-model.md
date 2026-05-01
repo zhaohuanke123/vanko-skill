@@ -75,4 +75,7 @@ Start from `assets/templates/project-config.json`.
 
 ## Adapter files
 
-Tool-specific memory files such as `CLAUDE.md`, `AGENTS.md`, or Cursor rules are adapters. Generate them from the canonical artifact set instead of making them the only source of truth.
+Tool-specific memory files such as `CLAUDE.md`, `AGENTS.md`, Cursor rules, or model memory
+are adapters. Generate them from the canonical artifact set instead of making them the only
+source of truth. Memory may remind agents where to start, but task state, progress, and
+requirements must remain in repo artifacts.

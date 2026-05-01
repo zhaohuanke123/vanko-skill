@@ -10,6 +10,7 @@ This skill implements a task-driven development workflow that helps AI agents:
 - Require documentation references before source edits
 - Verify changes with lint, build, browser tests, and docs/code/tests consistency checks
 - Maintain persistent state across sessions
+- Treat memory as a routing hint, not project state
 - Handle blocking situations gracefully
 - Commit changes atomically
 
@@ -100,6 +101,9 @@ The agent will:
 6. Update `progress.txt`
 7. Commit changes
 
+Memory may remind the agent to start with `AGENTS.md`, but task state and progress always
+come from repo files.
+
 ### Check Status
 
 ```
@@ -131,6 +135,26 @@ Shows:
 | `docs/design.md` | Module design and contracts when used with software-dev |
 | `init.sh` | Environment setup script |
 | `CLAUDE.md` | Project-specific instructions |
+
+## Memory Adapter
+
+Recommended memory:
+
+```text
+For projects using software-dev/coding-workflow: read AGENTS.md first, then PROJECT.md and WORKFLOW.md. Memory is only a routing hint; repo files are the source of truth. Pass the Documentation Gate before source edits.
+```
+
+Memory must not store project state as the only source. If memory conflicts with `task.json`,
+`progress.txt`, `PROJECT.md`, or `docs/*`, trust repo files.
+
+## Lesson Routing
+
+| Content | Location |
+|---------|----------|
+| Current task timeline, testing evidence, blocks | `progress.txt` |
+| Reusable project lessons | `docs/lessons-learned.md` |
+| Cross-project skill improvement lessons | skill `references/lessons-from-history.md` |
+| Reminder for where to look | memory |
 
 ## Key Features
 

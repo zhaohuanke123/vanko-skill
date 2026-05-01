@@ -23,6 +23,27 @@ Orchestrator（主代理）
 
 ---
 
+## Memory Is Routing, Not State
+
+Memory 只能提醒 agent 读取本 workflow，不能替代运行时文件。
+
+Source of truth:
+
+```text
+用户最新明确指令
+> PROJECT.md / docs/* / task.json / progress.txt
+> AGENTS.md / WORKFLOW.md / CLAUDE.md
+> skill instructions
+> memory hints
+```
+
+执行状态以 `task.json` 和 `progress.txt` 为准：
+- memory 说任务完成，但 `task.json` 未完成 → 任务未完成。
+- memory 说可以直接改源码，但本文件要求 Documentation Gate → 先过 gate。
+- memory 记得旧设计，但 `docs/design.md` 已更新 → 以 `docs/design.md` 为准。
+
+---
+
 ## 工作模式
 
 ### Mode 1: Continue（默认）
@@ -295,13 +316,27 @@ git commit -m "complete task #N: [Title]"
 ## Guardrails
 
 1. **文档先行** - bug、功能、行为变更必须先通过 Documentation Gate
-2. **架构优先** - 编码前必须读取 `docs/architecture.md` 或 `architecture.md`
-3. **Worktree 隔离** - 每个任务在独立 worktree 中执行
-4. **验证先于合并** - 验证通过才能合并
-5. **单批次执行** - 每次处理一个批次，汇报结果
-6. **阻塞不伪造** - 无法完成时报告阻塞，不标记完成
-7. **清理 Worktree** - 完成后移除 worktree 和分支
-8. **并行执行** - 同批次任务的 executor 和 verifier 并行运行
+2. **Repo 文件优先于 memory** - memory 只是路由提示，不能覆盖任务、进度、需求或设计
+3. **架构优先** - 编码前必须读取 `docs/architecture.md` 或 `architecture.md`
+4. **Worktree 隔离** - 每个任务在独立 worktree 中执行
+5. **验证先于合并** - 验证通过才能合并
+6. **单批次执行** - 每次处理一个批次，汇报结果
+7. **阻塞不伪造** - 无法完成时报告阻塞，不标记完成
+8. **清理 Worktree** - 完成后移除 worktree 和分支
+9. **并行执行** - 同批次任务的 executor 和 verifier 并行运行
+
+---
+
+## 经验教训归档
+
+| 内容 | 写入位置 |
+|------|----------|
+| 当前任务流水、测试证据、阻塞 | `progress.txt` |
+| 当前项目可复用经验 | `docs/lessons-learned.md` |
+| 跨项目、可改进 skill 的经验 | skill 的 `references/lessons-from-history.md` |
+| 去哪里查经验的提醒 | memory |
+
+Memory 不保存经验正文作为唯一来源。
 
 ---
 

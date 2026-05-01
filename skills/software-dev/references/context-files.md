@@ -50,6 +50,9 @@ phase transition.
 - Bug fixes must record whether docs already define the correct behavior or need revision.
 - Explicit documentation skips must be recorded with risk and follow-up docs.
 
+## Source of Truth
+Memory is only a routing hint. If memory disagrees with repo files, repo files win.
+
 ## Resume Context
 [2-3 sentences enough for a new conversation to continue.]
 ```
@@ -92,6 +95,12 @@ Before editing source code for any bug, feature, or behavior change:
 5. If the user explicitly confirms skipping docs, record the skip, risk, and follow-up docs in
    `PROJECT.md` or `progress.txt`.
 
+## Memory Adapter Policy
+Memory may remind agents to read `AGENTS.md`, `PROJECT.md`, and `WORKFLOW.md`, but it cannot
+override repo files. Do not rely on memory for phase, task, requirement, design, test,
+version, release, or rollback state. When memory conflicts with `PROJECT.md`, `docs/*`,
+`task.json`, or `progress.txt`, trust the repo files and update memory only as a routing hint.
+
 ## Durable Documents
 - `PROJECT.md` — status, phase, version, resume context
 - `AGENTS.md` — runtime navigation entry for future agents
@@ -114,6 +123,11 @@ Before editing source code for any bug, feature, or behavior change:
 5. Reconcile docs, code, tests, and README if behavior changed.
 6. Record version history or lessons when the change affects release state or future work.
 7. Use Git commits/tags to record approved checkpoints unless version control is explicitly disabled.
+
+## Recommended Memory
+For projects using software-dev/coding-workflow: read AGENTS.md first, then PROJECT.md and
+WORKFLOW.md. Memory is only a routing hint; repo files are the source of truth. Pass the
+Documentation Gate before source edits.
 
 ## Commands
 - Install:
@@ -146,6 +160,11 @@ requirement/design/architecture document is identified. If behavior changes, upd
 first. If the user confirms skipping docs, record the skip and stale-doc risk in
 `PROJECT.md` or `progress.txt`.
 
+## Memory Adapter
+Memory can remind agents to start here, but this file and the repo documents define the
+current workflow. If memory disagrees with `PROJECT.md`, `docs/*`, `task.json`, or
+`progress.txt`, trust the repo files.
+
 ## Runtime Files
 - `WORKFLOW.md` — workflow, documentation gate, validation
 - `task.json` — task list and document references
@@ -171,6 +190,11 @@ Before source edits:
 5. If docs are skipped by explicit user confirmation, record the skip and risk.
 
 Tasks cannot be marked complete until docs, code, and tests agree.
+
+## Memory Conflicts
+If memory says a task is complete but `task.json` does not, the task is not complete. If
+memory says direct coding is allowed but this workflow requires the Documentation Gate,
+follow this workflow.
 ```
 
 ## docs/version-history.md
@@ -217,3 +241,11 @@ Use this file to teach future agents. Keep entries concise and actionable.
 - Apply next time:
 - Related files:
 ```
+
+## Lesson Routing
+
+- Current task timeline, testing evidence, and blocks go in `progress.txt`.
+- Current project reusable lessons go in `docs/lessons-learned.md`.
+- Cross-project lessons that should improve a skill go in that skill's reference files, such
+  as `references/lessons-from-history.md`.
+- Memory may remember where to look for lessons, but it must not be the only copy of a lesson.

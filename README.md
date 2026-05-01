@@ -22,6 +22,7 @@ A structured development workflow for fullstack projects with documentation gate
 **Features:**
 - **Task Selection**: Automatically select next incomplete task from task.json
 - **Documentation Gate**: Require task-level requirement/design references before implementation
+- **Memory Adapter Rule**: Treat memory as a routing hint; repo files remain the source of truth
 - **Implementation Guidance**: Follow existing docs, code patterns, and conventions
 - **Testing Gates**: Lint, build, browser testing, and docs/code/tests consistency checks
 - **Progress Documentation**: Persistent session history, documentation updates, and skip-risk records in progress.txt
@@ -52,6 +53,7 @@ Guides AI agents through the complete software development lifecycle with phase-
 - **Document-First**: Update documentation before implementation; bug fixes and behavior changes must pass a documentation gate; docs, code, and tests must agree
 - **Progressive Loading**: Compact main file with reference files loaded on demand
 - **Cross-Conversation Persistence**: `PROJECT.md`, `CLAUDE.md`, `AGENTS.md`, and `WORKFLOW.md` preserve context and runtime workflow across sessions
+- **Memory Adapter Policy**: Memory may remind agents where to start, but cannot replace project state or docs
 - **Git Integration**: Commits, tags, and rollback built into every phase
 - **Recovery Protocol**: Exception handling for missing files, dirty worktrees, and abandoned projects
 
@@ -120,6 +122,8 @@ claude --plugin-dir ./vanko-skill
 | `docs/test-results.md` | Verification results |
 | `docs/version-history.md` | Release and rollback history |
 | `docs/lessons-learned.md` | Reusable lessons |
+
+Memory may remind agents to read these files, but the files remain the source of truth.
 
 ### For task-driven-ai-dev
 

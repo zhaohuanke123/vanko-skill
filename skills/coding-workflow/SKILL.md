@@ -18,9 +18,33 @@ license: Apache-2.0
 ```
 Skill 是"安装器"（一次性）
 项目文件是"运行时"（后续自驱动）
+Memory 是"路由提示"（提醒读取项目文件，不保存项目状态）
 
 AI 读取 skill → 部署架构文件 → 后续只读项目文件
 ```
+
+## Memory Is Routing, Not State
+
+Memory can remind an agent to read `AGENTS.md`, `WORKFLOW.md`, `task.json`, and
+`progress.txt`, but it cannot replace those files.
+
+Rules:
+- `AGENTS.md` and `WORKFLOW.md` are runtime entry points.
+- `task.json` is the source of truth for task state.
+- `progress.txt` is the source of truth for execution history, testing evidence, and blocks.
+- `PROJECT.md` and `docs/*` win for lifecycle, requirements, design, and version context.
+- If memory conflicts with repo files, trust repo files.
+
+Recommended memory:
+
+```text
+For projects using software-dev/coding-workflow: read AGENTS.md first, then PROJECT.md and WORKFLOW.md. Memory is only a routing hint; repo files are the source of truth. Pass the Documentation Gate before source edits.
+```
+
+Conflict examples:
+- Memory says a task is complete, but `task.json` says `passes=false` → the task is incomplete.
+- Memory says direct source edits are allowed, but `WORKFLOW.md` requires Documentation Gate → pass the gate first.
+- Memory recalls an old design, but `docs/design.md` differs → follow `docs/design.md`.
 
 ---
 
@@ -65,6 +89,7 @@ AI 读取 skill → 部署架构文件 → 后续只读项目文件
 5. **progress.txt** - 开发历史（如不存在）
    - 使用模板：`assets/templates/progress.txt`
    - 记录文档更新、测试证据、跳过文档风险
+   - 不要用 memory 替代进度记录
 
 ### Step 3: 验证部署
 
@@ -117,6 +142,17 @@ python scripts/validate_architecture.py --architecture-file architecture.md
 | `architecture.md` | 技术栈、目录结构、约束 | 编码前读取 |
 | `task.json` | 任务定义、依赖、需求/设计引用 | 需要知道做什么时 |
 | `progress.txt` | 开发历史、文档更新、测试证据 | 需要了解上下文时 |
+
+## 经验教训归档
+
+| 内容 | 写入位置 |
+|------|----------|
+| 当前任务流水、测试证据、阻塞 | `progress.txt` |
+| 当前项目可复用经验 | `docs/lessons-learned.md` |
+| 跨项目、可改进 skill 的经验 | skill 的 `references/lessons-from-history.md` |
+| 去哪里查经验的提醒 | memory |
+
+Memory 不保存经验正文作为唯一来源；它只提醒 agent 去读取对应文件。
 
 ---
 

@@ -25,7 +25,7 @@ This main file is intentionally compact. Load reference files only when needed:
 | Need | Load |
 |---|---|
 | Phase steps, outputs, gates, and templates | `references/lifecycle.md` |
-| `PROJECT.md`, `CLAUDE.md`, version history, lessons templates | `references/context-files.md` |
+| `PROJECT.md`, `CLAUDE.md`, memory adapter policy, version history, lessons templates | `references/context-files.md` |
 | Git workflow, commits, tags, and rollback | `references/version-control.md` |
 | Recovery rules and quick phase map | `references/operations.md` |
 
@@ -37,17 +37,49 @@ This main file is intentionally compact. Load reference files only when needed:
 2. **Traceability survives missing skill context.** Maintain `CLAUDE.md` as the generic agent
    entry point and `AGENTS.md`/`WORKFLOW.md` as runtime workflow guards: durable docs,
    loading order, commands, documentation gates, and development workflow.
-3. **Git is required for project changes.** Use Git to manage and record project
+3. **Memory is an adapter, not state.** Memory may remind agents to read the right project
+   files, but it must not replace `PROJECT.md`, `docs/*`, `task.json`, `progress.txt`, or
+   verification records. Repo files win over memory when they disagree.
+4. **Git is required for project changes.** Use Git to manage and record project
    modifications. If the project is not a Git repository, ask to initialize Git before
    creating or changing project files. Every approved phase, implementation slice, and
    release must have a commit or tag unless the user explicitly disables Git.
-4. **Version management uses Git plus docs.** Every meaningful release or milestone has a
+5. **Version management uses Git plus docs.** Every meaningful release or milestone has a
    Git commit or tag, version, change summary, verification status, and rollback note in
    `PROJECT.md` and `docs/version-history.md`.
-5. **Lessons are assets.** Capture reusable project lessons in `docs/lessons-learned.md`
+6. **Lessons are assets.** Capture reusable project lessons in `docs/lessons-learned.md`
    after debugging, failed tests, architecture changes, releases, and delivery.
-6. **Docs and implementation must agree.** If tests pass but docs describe a different system,
+7. **Docs and implementation must agree.** If tests pass but docs describe a different system,
    the phase is not complete. A bug fix, feature, or behavior change with stale docs is not done.
+
+## Memory Adapter Policy
+
+Memory can reduce repeated prompting, but it is only a routing hint.
+
+Allowed memory:
+- "Read `AGENTS.md` first, then `PROJECT.md` and `WORKFLOW.md`."
+- "Pass the Documentation Gate before source edits."
+- "Use `docs/lessons-learned.md` for project lessons and `progress.txt` for task history."
+
+Forbidden memory as source of truth:
+- Current phase, version, release status, or task completion.
+- Requirements, design changes, test results, bug status, or rollback state.
+- Lessons text that should live in `docs/lessons-learned.md` or skill references.
+
+Conflict priority:
+
+```text
+User's latest explicit instruction
+> PROJECT.md / docs/* / task.json / progress.txt
+> AGENTS.md / WORKFLOW.md / CLAUDE.md
+> skill instructions
+> memory hints
+```
+
+If memory says a task is complete but `task.json` does not, the task is not complete. If
+memory says direct coding is allowed but `WORKFLOW.md` requires the Documentation Gate,
+follow `WORKFLOW.md`. If memory recalls an old design but `docs/design.md` differs, follow
+`docs/design.md`.
 
 ## Startup
 
