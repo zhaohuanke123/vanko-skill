@@ -42,6 +42,18 @@ Interactive learning system based on Bloom's "2 Sigma Problem" and mastery learn
 - **Obsidian Integration**: Auto-add `^block-id` for precise note references
 - **Spaced Repetition**: Ebbinghaus forgetting curve review system (20min, 1h, 1d, 2d, 6d, 31d)
 
+### software-dev
+
+Guides AI agents through the complete software development lifecycle with phase-gated, document-driven execution. Designed for small/demo projects that need fast iteration with disciplined delivery.
+
+**Features:**
+- **10-Phase Lifecycle**: Problem definition → requirements → planning → architecture → design → coding → unit testing → integration → system testing → delivery
+- **Document-First**: Update documentation before implementation; docs, code, and tests must agree
+- **Progressive Loading**: Compact main file with reference files loaded on demand
+- **Cross-Conversation Persistence**: `PROJECT.md` and `CLAUDE.md` preserve context across sessions
+- **Git Integration**: Commits, tags, and rollback built into every phase
+- **Recovery Protocol**: Exception handling for missing files, dirty worktrees, and abandoned projects
+
 ## Installation
 
 ### From GitHub Marketplace
@@ -61,6 +73,9 @@ Interactive learning system based on Bloom's "2 Sigma Problem" and mastery learn
 
 # Interactive learning
 /plugin install interactive-learning@zhaohuanke123-vanko-skill
+
+# Software development lifecycle
+/plugin install software-dev@zhaohuanke123-vanko-skill
 ```
 
 ### Local Development
@@ -81,9 +96,27 @@ claude --plugin-dir ./vanko-skill
 
 # Interactive learning
 /interactive-learning:interactive-learning
+
+# Software development lifecycle
+/software-dev:software-dev
 ```
 
 ## Required Artifacts
+
+### For software-dev
+
+| File | Purpose |
+|------|---------|
+| `PROJECT.md` | Single source of truth for project state, phase, and version |
+| `CLAUDE.md` | Generic agent entry point for cross-session persistence |
+| `docs/problem-definition.md` | Problem statement and success criteria |
+| `docs/requirements.md` | Functional and non-functional requirements |
+| `docs/plan.md` | Stack, milestones, risks, version strategy |
+| `docs/architecture.md` | Components and data flow |
+| `docs/design.md` | Module design and contracts |
+| `docs/test-results.md` | Verification results |
+| `docs/version-history.md` | Release and rollback history |
+| `docs/lessons-learned.md` | Reusable lessons |
 
 ### For task-driven-ai-dev
 
