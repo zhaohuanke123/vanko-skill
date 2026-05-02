@@ -59,12 +59,16 @@ Conflict examples:
 
 ### Step 1: 检查项目状态
 
-检查项目根目录是否存在以下文件：
+**输入**：项目根目录路径
+
+**操作**：检查以下文件是否存在：
 - `CLAUDE.md`
 - `WORKFLOW.md`
 - `architecture.md`
 - `PROJECT.md`（如项目使用 software-dev 生命周期）
 - `docs/requirements.md`、`docs/design.md`（如项目使用文档先行）
+
+**输出**：文件存在状态列表
 
 **检查点 1**：如果检测到部分文件已存在：
 1. 列出已存在的文件及其修改时间
@@ -73,48 +77,44 @@ Conflict examples:
 
 ### Step 2: 收集项目信息
 
-在部署 architecture.md 前，向用户收集以下信息：
+**输入**：用户回答（可选）
 
-**检查点 2**：逐项询问（或让用户一次性提供）：
+**操作**：向用户收集以下信息：
 - 项目目标（一句话描述）
 - 技术栈（语言、框架、数据库等）
 - 核心功能（3-5 个主要功能点）
 - 特殊约束（如有）
 
-如果用户选择跳过，使用占位符模板，后续可手动填充。
+**输出**：项目信息对象
+
+**检查点 2**：逐项询问（或让用户一次性提供）。如果用户选择跳过，使用占位符模板，后续可手动填充。
 
 ### Step 3: 部署架构文件
 
-根据 Step 1 的检查结果，按以下顺序部署：
+**输入**：Step 1 检查结果 + Step 2 项目信息
 
-1. **CLAUDE.md** - 项目配置和导航入口
-   - 使用模板：`assets/templates/CLAUDE.md`
-   - 根据项目信息填充
-   - 如果项目已有 CLAUDE.md，询问用户是否合并或覆盖
+**操作**：根据检查结果，按顺序部署文件：
 
-2. **WORKFLOW.md** - 完整工作流程指南和 Documentation Gate
-   - 使用模板：`assets/templates/WORKFLOW.md`
-   - 包含文档门禁、执行、验证、合并流程
+| 序号 | 文件 | 模板路径 | 说明 |
+|------|------|----------|------|
+| 1 | `CLAUDE.md` | `assets/templates/CLAUDE.md` | 如已存在，询问合并或覆盖 |
+| 2 | `WORKFLOW.md` | `assets/templates/WORKFLOW.md` | 直接复制 |
+| 3 | `architecture.md` | `assets/templates/architecture.md` | 填充项目信息 |
+| 4 | `task.json` | `assets/templates/task.json` | 如不存在则创建 |
+| 5 | `progress.txt` | `assets/templates/progress.txt` | 如不存在则创建 |
 
-3. **architecture.md** - 架构约束
-   - 使用模板：`assets/templates/architecture.md`
-   - 填充 Step 2 收集的项目信息
-
-4. **task.json** - 任务定义模板（如不存在）
-   - 使用模板：`assets/templates/task.json`
-   - 每个任务包含 `requirement_ref`、`design_ref`、`docs_updated`
-
-5. **progress.txt** - 开发历史（如不存在）
-   - 使用模板：`assets/templates/progress.txt`
-   - 记录文档更新、测试证据、跳过文档风险
-   - 不要用 memory 替代进度记录
+**输出**：部署的文件列表
 
 ### Step 4: 验证部署
 
-运行验证脚本：
+**输入**：`architecture.md` 文件路径
+
+**操作**：运行验证脚本
 ```bash
 python scripts/validate_architecture.py --architecture-file architecture.md
 ```
+
+**输出**：验证结果（通过/失败 + 错误日志）
 
 **检查点 3**：如果验证失败：
 1. 展示错误日志
@@ -123,7 +123,9 @@ python scripts/validate_architecture.py --architecture-file architecture.md
 
 ### Step 5: 完成提示
 
-告诉用户：
+**输入**：部署结果
+
+**输出**：用户提示信息
 ```
 项目已初始化完成。部署的文件：
 - CLAUDE.md（项目配置和导航入口）
