@@ -2,8 +2,8 @@
 name: coding-workflow
 description: |
   项目初始化器 - 部署 Harness Engineering 架构文件和文档先行运行时门禁到项目目录。
-  TRIGGER when: 用户说 "初始化项目"、"开始新项目"、"部署架构"；项目缺少 AGENTS.md 或 WORKFLOW.md。
-  DO NOT TRIGGER when: 项目已有完整的架构文件（AGENTS.md + WORKFLOW.md + architecture.md）。
+  TRIGGER when: 用户说 "初始化项目"、"开始新项目"、"部署架构"；项目缺少 CLAUDE.md 或 WORKFLOW.md。
+  DO NOT TRIGGER when: 项目已有完整的架构文件（CLAUDE.md + WORKFLOW.md + architecture.md）。
 license: Apache-2.0
 ---
 
@@ -25,11 +25,11 @@ AI 读取 skill → 部署架构文件 → 后续只读项目文件
 
 ## Memory Is Routing, Not State
 
-Memory can remind an agent to read `AGENTS.md`, `WORKFLOW.md`, `task.json`, and
+Memory can remind an agent to read `CLAUDE.md`, `WORKFLOW.md`, `task.json`, and
 `progress.txt`, but it cannot replace those files.
 
 Rules:
-- `AGENTS.md` and `WORKFLOW.md` are runtime entry points.
+- `CLAUDE.md` and `WORKFLOW.md` are runtime entry points.
 - `task.json` is the source of truth for task state.
 - `progress.txt` is the source of truth for execution history, testing evidence, and blocks.
 - `PROJECT.md` and `docs/*` win for lifecycle, requirements, design, and version context.
@@ -38,7 +38,7 @@ Rules:
 Recommended memory:
 
 ```text
-For projects using software-dev/coding-workflow: read AGENTS.md first, then PROJECT.md and WORKFLOW.md. Memory is only a routing hint; repo files are the source of truth. Pass the Documentation Gate before source edits.
+For projects using software-dev/coding-workflow: read CLAUDE.md first, then PROJECT.md and WORKFLOW.md. Memory is only a routing hint; repo files are the source of truth. Pass the Documentation Gate before source edits.
 ```
 
 Conflict examples:
@@ -51,7 +51,7 @@ Conflict examples:
 ## 触发条件
 
 - 用户说 "初始化项目"、"开始新项目"、"部署架构"
-- 项目缺少 `AGENTS.md` 或 `WORKFLOW.md`
+- 项目缺少 `CLAUDE.md` 或 `WORKFLOW.md`
 
 ---
 
@@ -60,7 +60,7 @@ Conflict examples:
 ### Step 1: 检查项目状态
 
 检查项目根目录是否存在以下文件：
-- `AGENTS.md`
+- `CLAUDE.md`
 - `WORKFLOW.md`
 - `architecture.md`
 - `PROJECT.md`（如项目使用 software-dev 生命周期）
@@ -87,9 +87,10 @@ Conflict examples:
 
 根据 Step 1 的检查结果，按以下顺序部署：
 
-1. **AGENTS.md** - 项目导航入口（~60行）
-   - 使用模板：`assets/templates/AGENTS.md`
+1. **CLAUDE.md** - 项目配置和导航入口
+   - 使用模板：`assets/templates/CLAUDE.md`
    - 根据项目信息填充
+   - 如果项目已有 CLAUDE.md，询问用户是否合并或覆盖
 
 2. **WORKFLOW.md** - 完整工作流程指南和 Documentation Gate
    - 使用模板：`assets/templates/WORKFLOW.md`
@@ -125,13 +126,13 @@ python scripts/validate_architecture.py --architecture-file architecture.md
 告诉用户：
 ```
 项目已初始化完成。部署的文件：
-- AGENTS.md（导航入口）
+- CLAUDE.md（项目配置和导航入口）
 - WORKFLOW.md（工作流程和 Documentation Gate）
 - architecture.md（架构约束）
 - task.json（任务模板和文档引用）
 
 后续开发：
-- 新对话时，AI 先读取 AGENTS.md，再按 WORKFLOW.md 通过 Documentation Gate
+- 新对话时，AI 自动读取 CLAUDE.md，再按 WORKFLOW.md 通过 Documentation Gate
 - 不需要再次调用此 skill
 ```
 
@@ -145,7 +146,7 @@ python scripts/validate_architecture.py --architecture-file architecture.md
 项目已初始化，架构文件完整。
 
 后续开发：
-- 新对话时读取 AGENTS.md 即可
+- 新对话时 AI 自动读取 CLAUDE.md
 - AI 会自动读取 WORKFLOW.md、architecture.md、task.json 和相关 docs
 - 源码修改前必须通过 WORKFLOW.md 中的 Documentation Gate
 - 按渐进式披露原则，按需读取必要文件
@@ -157,7 +158,7 @@ python scripts/validate_architecture.py --architecture-file architecture.md
 
 | 文件 | 职责 | AI 读取时机 |
 |------|------|-------------|
-| `AGENTS.md` | 导航入口，指向所有文件 | 新对话首先读取 |
+| `CLAUDE.md` | 项目配置和导航入口 | 新对话自动读取 |
 | `WORKFLOW.md` | 工作流程（Orchestrator）和 Documentation Gate | 需要执行任务时 |
 | `executor.md` | Executor 子代理指令 | spawn executor 时 |
 | `verifier.md` | Verifier 子代理指令 | spawn verifier 时 |
@@ -173,7 +174,7 @@ python scripts/validate_architecture.py --architecture-file architecture.md
 
 | 模板 | 用途 |
 |------|------|
-| `AGENTS.md` | 导航入口模板 |
+| `CLAUDE.md` | 项目配置和导航入口模板 |
 | `WORKFLOW.md` | 工作流程模板（Orchestrator） |
 | `executor.md` | Executor 子代理指令模板 |
 | `verifier.md` | Verifier 子代理指令模板 |

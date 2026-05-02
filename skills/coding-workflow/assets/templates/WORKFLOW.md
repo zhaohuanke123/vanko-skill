@@ -32,7 +32,7 @@ Source of truth:
 ```text
 用户最新明确指令
 > PROJECT.md / docs/* / task.json / progress.txt
-> AGENTS.md / WORKFLOW.md / CLAUDE.md
+> CLAUDE.md / WORKFLOW.md
 > skill instructions
 > memory hints
 ```
@@ -168,7 +168,7 @@ git worktree add .worktrees/task-<ID> -b feature/task-<ID>
 读取 executor.md 获取你的指令。
 
 === 必须首先执行 ===
-1. 读取 AGENTS.md、WORKFLOW.md、PROJECT.md（如存在）
+1. 读取 CLAUDE.md、WORKFLOW.md、PROJECT.md（如存在）
 2. 读取任务的 requirement_ref 和 design_ref
 3. 读取 docs/architecture.md 或 architecture.md 获取架构约束
 4. 如果 Documentation Gate 未通过，报告 BLOCKED，不要修改源码

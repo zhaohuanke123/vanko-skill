@@ -11,7 +11,7 @@
 **验证前必须读取**：
 
 ```
-1. AGENTS.md - 导航入口和 Documentation Gate
+1. CLAUDE.md - 项目配置和导航入口
 2. WORKFLOW.md - 执行流程和门禁规则
 3. PROJECT.md - 项目阶段、版本、恢复上下文（如存在）
 4. 当前任务的 requirement_ref 和 design_ref

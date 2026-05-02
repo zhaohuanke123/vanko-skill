@@ -11,12 +11,11 @@
 **编码前必须读取**：
 
 ```
-1. AGENTS.md - 导航入口和 Documentation Gate
+1. CLAUDE.md - 项目配置和导航入口
 2. WORKFLOW.md - 执行流程和门禁规则
 3. PROJECT.md - 项目阶段、版本、恢复上下文（如存在）
-4. CLAUDE.md - 项目特定指令（如存在）
-5. 当前任务的 requirement_ref 和 design_ref
-6. docs/architecture.md 或 architecture.md - 获取技术栈、目录结构、禁止事项
+4. 当前任务的 requirement_ref 和 design_ref
+5. docs/architecture.md 或 architecture.md - 获取技术栈、目录结构、禁止事项
 ```
 
 ### Step 2: Documentation Gate 自检
@@ -71,7 +70,7 @@ cd <worktree_path>
 
 ### 2. 理解代码库
 
-- 读取 `AGENTS.md` 和 `WORKFLOW.md` 获取运行时规则
+- 读取 `CLAUDE.md` 和 `WORKFLOW.md` 获取运行时规则
 - 读取任务对应的需求和设计文档
 - 读取 `docs/architecture.md` 或 `architecture.md` 获取架构约束
 - 读取相关现有源文件，理解模式
